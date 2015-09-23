@@ -2,20 +2,20 @@ import select
 import socket
 import sys
 
-# from utils import User
-from utils import create_socket, msg_parser
+from utils import User
+from utils import create_socket, msg_parser, RECV_BUFFER
 
-READ_BUFF = 4096
+localhost    = "127.0.0.1"
+default_port = 8080
 
 class Server(object):
       
-      def __init__(self, host="", port=8080):
+      def __init__(self, host=localhost, port=default_port):
           self.sever_socket = create_socket((host, port))
           self.connections  = [self.sever_socket]
           print "PyTalk server started on port " + str(port)
 
-      def sever_loop(self):
-
+      def server_loop(self):
           status = 1;
           while status:
                 try:
@@ -28,7 +28,7 @@ class Server(object):
                            self.connections.append(new_user)
                            print "Client %s at %s now join!" % (new_user, addr)
                         else: # new message
-                           msg = user.socket.recv(READ_BUFF)
+                           msg = user.socket.recv(RECV_BUFFER)
                            if msg:
                               msg_parser(user, msg)
                            else: # no msg, user down, close connection
@@ -40,16 +40,15 @@ class Server(object):
                         self.connections.remove(socket)
 
                 except KeyboardInterrupt, SystemExit:
-                       print
-                       print "PyTalk Server Close..."
+                       print "\nPyTalk Server Close..."
                        status = 0
           
           self.sever_socket.close()  
           
       def run(self):
-          self.sever_loop();
+          self.server_loop();
 
 
 if __name__ == "__main__":
-   server = Server()
+   server = Server(port = 8080 if sys.argv is not None else int(sys.argv[1]))
    server.run()
