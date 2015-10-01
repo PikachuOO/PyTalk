@@ -11,6 +11,7 @@ NEED_USR_N_PASS = '1'
 USR_PASS_ERROR  = '2'
 CLIENT_IP_BLOCK = '3'
 USR_PASS_KEY    = "here_comes_usrname_password" 
+LOGOUT_STR      = "logout"
 
 
 def create_socket(address):
@@ -96,7 +97,8 @@ class Utils(object):
                 except IndexError:
                     self.send_err_msg(user, "can't find user or message")
            elif args[0] == "logout":
-              print args
+              self.broadcast(user, user.name + " is leaving PyTalk...")
+              self.remove_user(user)
            else:
               self.send_err_msg(user, "Invalid Input Command")
 
@@ -137,7 +139,10 @@ class Utils(object):
              break
           else:
              usrname, passwrd = line.split(' ')
-             usr_pass_hash[usrname] = passwrd[:-1] # escape the '\n'
+             if passwrd[-1] == '\n':
+                usr_pass_hash[usrname] = passwrd[:-1] # escape the '\n'
+             else:
+                usr_pass_hash[usrname] = passwrd # escape the '\n'
         file_obj.close()
         return usr_pass_hash
 
