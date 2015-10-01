@@ -5,7 +5,7 @@ import sys
 # from utils import User
 from utils import connect_server
 from utils import RECV_BUFFER, NEED_USR_N_PASS, USR_PASS_ERROR, \
-                  CLIENT_IP_BLOCK, USR_PASS_KEY
+                  CLIENT_IP_BLOCK, USR_PASS_KEY, LOGOUT_STR
 
 
 def argv_reader(argv):
@@ -20,6 +20,7 @@ class Client(object):
       def __init__(self, host, port):
           self.server_connect = connect_server((host, port))
           self.socket_list    = [sys.stdin, self.server_connect]
+          self.client_name    = ""
 
       def prompt(self, msg_prefix="[Me]"):
           sys.stdout.write(msg_prefix + "> ")
@@ -42,6 +43,8 @@ class Client(object):
                                  sys.exit(2)
                               else:
                                  if self.is_client_login(msg):
+                                    if "Welcome " in msg:
+                                        self.client_name = msg.split(' ')[1]
                                     sys.stdout.write(msg)
                                     self.prompt()      
                                  else:
@@ -59,7 +62,11 @@ class Client(object):
                            else: # msg from user to type in
                               msg = sys.stdin.readline()
                               if msg:
-                                 self.server_connect.sendall(msg)
+                                if msg[:-1] == LOGOUT_STR:
+                                    print "Bye %s ..." % self.client_name
+                                    status = 0 
+                                else:
+                                    self.server_connect.sendall(msg)
                               # self.prompt()                              
 
                 except KeyboardInterrupt, SystemExit:
