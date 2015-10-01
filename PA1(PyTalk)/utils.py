@@ -69,7 +69,7 @@ class Utils(object):
                             usrnames    = args[2:msg_idx]
                             connections = self.get_usr_connections(usrnames)
                             try:
-                                message = ' '.join(args[msg_idx + 1])
+                                message = ' '.join(args[msg_idx + 1:])
                                 self.broadcast                                 \
                                         (user,                                 \
                                          user.name + " says: " + message,      \
@@ -85,7 +85,16 @@ class Utils(object):
                     self.send_err_msg(user, "broadcast needs args")
 
            elif args[0] == "message":
-              print "message"
+                try:
+                    usr = self.get_single_usr_connection(args[1])
+                    if usr is None:
+                        self.send_err_msg(user, "can't find the specific user")
+                    else:
+                        message = ' '.join(args[2:])
+                        self.send_msg(usr, user.name + "says: " + message)
+                        self.send_msg(user)
+                except IndexError:
+                    self.send_err_msg(user, "can't find user or message")
            elif args[0] == "logout":
               print args
            else:
@@ -103,10 +112,13 @@ class Utils(object):
         user.socket.send(err_prefix + message + '\n')
 
     def send_msg(self, user, message=""):
-        user.socket.send(message + '\n')
+        user.socket.send('\n' + message + '\n')
 
     def get_single_usr_connection(self, usrname):
-        
+        for usr in self.connections:
+            if usr != self.server_socket and usr.name == usrname:
+               return usr
+        return None
     
     def get_usr_connections(self, usrnames):
         connections = []
