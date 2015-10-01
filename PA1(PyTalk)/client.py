@@ -3,7 +3,7 @@ import socket
 import sys
 
 # from utils import User
-from utils import connect_server, msg_parser
+from utils import connect_server
 from utils import RECV_BUFFER, NEED_USR_N_PASS, USR_PASS_ERROR, \
                   CLIENT_IP_BLOCK, USR_PASS_KEY
 
@@ -58,8 +58,9 @@ class Client(object):
 
                            else: # msg from user to type in
                               msg = sys.stdin.readline()
-                              self.server_connect.sendall(msg)
-                              self.prompt()                              
+                              if msg:
+                                 self.server_connect.sendall(msg)
+                              # self.prompt()                              
 
                 except KeyboardInterrupt, SystemExit:
                        print "\nLeaving PyTalk..."
