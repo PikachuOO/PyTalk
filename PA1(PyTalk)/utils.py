@@ -1,6 +1,8 @@
 import socket
 import sys
 import os
+# from server import Server
+
 
 RECV_BUFFER     = 4096
 MAX_CLIENT_NUM  = 30
@@ -30,33 +32,114 @@ def connect_server(address):
         print "unable to connect server, leaving..."
         sys.exit(1)
 
-def msg_parser(user, msg):
-    print "enter msg_parser"
+class Utils(object):
+    def __init__(self, connections, server_socket):
+        self.connections = connections
+        self.server_socket = server_socket
 
-def load_usr_pass():
-    usr_pass_hash = {}
-    file_obj = open("user_pass.txt", 'r')
-    while True:
-      line = file_obj.readline()
-      if not line:
-         break
-      else:
-         usrname, passwrd = line.split(' ')
-         usr_pass_hash[usrname] = passwrd[:-1] # escape the '\n'
-    file_obj.close()
-    return usr_pass_hash
+    def msg_handler(self, user, msg):
+        msg  = msg.lower()[:-1]
+        args = msg.split(' ')
+        if args:
+           if args[0] == "whoelse":
+              usr_list = ["Current Online Users:\n"]
+              for usr in self.connections:
+                  if usr != user and usr != self.server_socket:
+                     usr_list.append(usr.name)
+                     usr_list.append("\n")
+              user.socket.send(''.join(usr_list))
+           elif args[0] == "wholast":
+              print "wholast cmd"
+           elif args[0] == "broadcast":
+                try:
+                    if args[1] == "message":
+                        if args[2:]:
+                            message = ' '.join(args[2:])
+                            self.broadcast(user, user.name + " says: " + message)
+                            self.send_msg(user)
+                        else:
+                            self.send_err_msg(user,                            \
+                                             "message required for broadcast")
+                    elif args[1] == "user":
+                        msg_idx = self.find_messgae_idx(args)
+                        if msg_idx < 3:
+                            self.send_err_msg(user,                            \
+                                             "plz assign users to broadcast")
+                        else:
+                            usrnames    = args[2:msg_idx]
+                            connections = self.get_usr_connections(usrnames)
+                            try:
+                                message = ' '.join(args[msg_idx + 1])
+                                self.broadcast                                 \
+                                        (user,                                 \
+                                         user.name + " says: " + message,      \
+                                         connections)
+                                self.send_msg(user)
+                            except IndexError:
+                                self.send_err_msg                              \
+                                     (user, "message required for broadcast")
+                    else:
+                        self.send_err_msg                                      \
+                             (user, "Invalid Arguments for broadcast")
+                except IndexError:
+                    self.send_err_msg(user, "broadcast needs args")
 
+           elif args[0] == "message":
+              print "message"
+           elif args[0] == "logout":
+              print args
+           else:
+              self.send_err_msg(user, "Invalid Input Command")
 
+    def find_messgae_idx(self, args):
+        msg_idx = -1
+        for i in xrange(len(args)):
+            if args[i] == "message":
+               msg_idx = i
+               break
+        return msg_idx
 
+    def send_err_msg(self, user, message, err_prefix="Error: "):
+        user.socket.send(err_prefix + message + '\n')
 
-class User(object):
-      def __init__(self, socket, name="new_user"): 
-          socket.setblocking(0)
-          self.socket = socket 
-          self.name   = name # why? whats this?
+    def send_msg(self, user, message=""):
+        user.socket.send(message + '\n')
 
-      def fileno(self): 
-          return self.socket.fileno()
+    def get_single_usr_connection(self, usrname):
+        
+    
+    def get_usr_connections(self, usrnames):
+        connections = []
+        for usrname in usrnames:
+            for usr in self.connections:
+                if usr != self.server_socket and usr.name == usrname:
+                   connections.append(usr)
+        return connections
 
+    def load_usr_pass(self):
+        usr_pass_hash = {}
+        file_obj = open("user_pass.txt", 'r')
+        while True:
+          line = file_obj.readline()
+          if not line:
+             break
+          else:
+             usrname, passwrd = line.split(' ')
+             usr_pass_hash[usrname] = passwrd[:-1] # escape the '\n'
+        file_obj.close()
+        return usr_pass_hash
 
+    def remove_user(self, user):
+        user.socket.close()
+        if user in self.connections:
+           self.connections.remove(user)
 
+    def broadcast(self, user, message, connections=[]):
+        if not connections:
+            connections = self.connections
+        for usr in connections:
+            if usr != self.server_socket and usr != user:
+                try:
+                   usr.socket.send('\n' + message + '\n')
+                except:
+                   self.remove_user(usr)
