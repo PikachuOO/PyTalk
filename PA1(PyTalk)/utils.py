@@ -1,17 +1,17 @@
 import socket
 import sys
 import os
-# from server import Server
 
 
 RECV_BUFFER     = 4096
-MAX_CLIENT_NUM  = 30
+MAX_CLIENT_NUM  = 10
 TIME_OUT        = 0
 NEED_USR_N_PASS = '1'
 USR_PASS_ERROR  = '2'
 CLIENT_IP_BLOCK = '3'
 USR_PASS_KEY    = "here_comes_usrname_password" 
 LOGOUT_STR      = "logout"
+TIME_OUT        = 30
 
 
 def create_socket(address):
