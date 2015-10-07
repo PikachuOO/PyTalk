@@ -5,7 +5,7 @@ import sys
 # from utils import User
 from utils import connect_server
 from utils import RECV_BUFFER, NEED_USR_N_PASS, USR_PASS_ERROR, \
-                  CLIENT_IP_BLOCK, USR_PASS_KEY, LOGOUT_STR
+                  CLIENT_IP_BLOCK, TIME_OUT_BLOCK, USR_PASS_KEY, LOGOUT_STR
 
 
 def argv_reader(argv):
@@ -16,7 +16,7 @@ def argv_reader(argv):
        return argv[1], int(argv[2])
 
 
-class Client(object):      
+class Client(object):
       def __init__(self, host, port):
           self.server_connect = connect_server((host, port))
           self.socket_list    = [sys.stdin, self.server_connect]
@@ -45,8 +45,13 @@ class Client(object):
                                  if self.is_client_login(msg):
                                     if "Welcome " in msg:
                                         self.client_name = msg.split(' ')[1]
+                                    elif self.is_client_inactive(msg):
+                                        sys.stdout.write('\n' + self.client_name \
+                                               + ", you are too inactive, bye~\n")
+                                        status = 0
+                                        break
                                     sys.stdout.write(msg)
-                                    self.prompt()      
+                                    self.prompt()
                                  else:
                                     if msg == NEED_USR_N_PASS:
                                        self.login_prompt                       \
@@ -58,27 +63,29 @@ class Client(object):
                                        sys.stdout.write                        \
                                        ("No more than 3 times error, block ~\n")
                                        status = 0
-
                            else: # msg from user to type in
                               msg = sys.stdin.readline()
                               if msg:
                                 if msg[:-1] == LOGOUT_STR:
                                     print "Bye %s ..." % self.client_name
-                                    status = 0 
+                                    status = 0
                                 else:
                                     self.server_connect.sendall(msg)
-                              # self.prompt()                              
+                              # self.prompt()
 
                 except KeyboardInterrupt, SystemExit:
                        print "\nLeaving PyTalk..."
                        status = 0
-          self.server_connect.close()        
-      
+          self.server_connect.close()
+
       def is_client_login(self, msg):
           return not (msg == NEED_USR_N_PASS or                                \
                       msg == USR_PASS_ERROR  or                                \
                       msg == CLIENT_IP_BLOCK)
-            
+
+      def is_client_inactive(self, msg):
+          return msg == TIME_OUT_BLOCK
+
       def login_prompt(self, display_msg):
           sys.stdout.write(display_msg)
           self.prompt("Username:")
@@ -94,6 +101,6 @@ class Client(object):
           self.client_loop();
 
 if __name__ == "__main__":
-   host, port = argv_reader(sys.argv) 
+   host, port = argv_reader(sys.argv)
    client     = Client(host, port)
    client.run()

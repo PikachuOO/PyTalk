@@ -1,18 +1,25 @@
+import datetime
+import md5
 import socket
 import sys
 import os
 
+def md5_encrypt(string):
+    return md5.new(string).digest()
+
+def set_minutes(minutes):
+    return minutes * 60
 
 RECV_BUFFER     = 4096
 MAX_CLIENT_NUM  = 10
-TIME_OUT        = 0
-NEED_USR_N_PASS = '1'
-USR_PASS_ERROR  = '2'
-CLIENT_IP_BLOCK = '3'
-USR_PASS_KEY    = "here_comes_usrname_password" 
+BLOCK_TIME      = set_minutes(1)
+TIME_OUT        = set_minutes(30)
+NEED_USR_N_PASS = md5_encrypt('1')
+USR_PASS_ERROR  = md5_encrypt('2')
+CLIENT_IP_BLOCK = md5_encrypt('3')
+TIME_OUT_BLOCK  = md5_encrypt('4')
+USR_PASS_KEY    = "here_comes_usrname_password"
 LOGOUT_STR      = "logout"
-TIME_OUT        = 30
-
 
 def create_socket(address):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -121,7 +128,7 @@ class Utils(object):
             if usr != self.server_socket and usr.name == usrname:
                return usr
         return None
-    
+
     def get_usr_connections(self, usrnames):
         connections = []
         for usrname in usrnames:
@@ -146,6 +153,20 @@ class Utils(object):
         file_obj.close()
         return usr_pass_hash
 
+    def update_user_active_time(self, user):
+        user.active_time = datetime.datetime.now()
+
+    def user_active_check(self):
+        for user in self.connections:
+            if user != self.server_socket and self.is_user_inactive(user):
+                print "kick %s out" % user.name
+                user.socket.send(TIME_OUT_BLOCK)
+                self.remove_user(user)
+
+    def is_user_inactive(self, user):
+        return (datetime.datetime.now() - user.active_time).total_seconds()    \
+                                                                 > TIME_OUT
+
     def remove_user(self, user):
         user.socket.close()
         if user in self.connections:
@@ -157,6 +178,6 @@ class Utils(object):
         for usr in connections:
             if usr != self.server_socket and usr != user:
                 try:
-                   usr.socket.send('\n' + message + '\n')
+                   self.send_msg(usr, message)
                 except:
                    self.remove_user(usr)

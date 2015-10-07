@@ -1,13 +1,14 @@
-import time
+import datetime
 
 class User(object):
-      def __init__(self, socket, name="new_user"): 
+      def __init__(self, socket, addr, name="new_user"):
           socket.setblocking(0)
-          self.socket      = socket 
-          self.name        = name # why? whats this?
-          self.login_time  = time.time()
+          self.socket      = socket
+          self.name        = name
+          self.ip          = addr[0]
+          self.active_time = datetime.datetime.now()
 
-      def fileno(self): 
+      def fileno(self):
           return self.socket.fileno()
 
 
