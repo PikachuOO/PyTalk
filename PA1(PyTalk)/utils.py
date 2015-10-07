@@ -18,6 +18,7 @@ NEED_USR_N_PASS = md5_encrypt('1')
 USR_PASS_ERROR  = md5_encrypt('2')
 CLIENT_IP_BLOCK = md5_encrypt('3')
 TIME_OUT_BLOCK  = md5_encrypt('4')
+STILL_BLOCK     = md5_encrypt('5')
 USR_PASS_KEY    = "here_comes_usrname_password"
 LOGOUT_STR      = "logout"
 
@@ -44,6 +45,7 @@ class Utils(object):
     def __init__(self, connections, server_socket):
         self.connections = connections
         self.server_socket = server_socket
+        self.usr_fail_login = {}
 
     def msg_handler(self, user, msg):
         msg  = msg.lower()[:-1]
@@ -57,7 +59,7 @@ class Utils(object):
                      usr_list.append("\n")
               user.socket.send(''.join(usr_list))
            elif args[0] == "wholast":
-              print "wholast cmd"
+                print "wholast"
            elif args[0] == "broadcast":
                 try:
                     if args[1] == "message":
@@ -166,6 +168,15 @@ class Utils(object):
     def is_user_inactive(self, user):
         return (datetime.datetime.now() - user.active_time).total_seconds()    \
                                                                  > TIME_OUT
+    def is_usr_blocked(self, user):
+          block_time = self.usr_fail_login.get((user.name, user.ip))
+          return block_time and (datetime.datetime.now() - block_time)         \
+                                                .total_seconds() <= BLOCK_TIME
+    def block_fail_login(self, user):
+        # self.send_msg(user, "%s, you are still blocked from ip %s"             \
+        #                                         % (user.name, user.ip))
+        user.socket.send(STILL_BLOCK)
+        self.remove_user(user)
 
     def remove_user(self, user):
         user.socket.close()
