@@ -18,6 +18,7 @@ NEED_USR_N_PASS = md5_encrypt('1')
 USR_PASS_ERROR  = md5_encrypt('2')
 CLIENT_IP_BLOCK = md5_encrypt('3')
 TIME_OUT_BLOCK  = md5_encrypt('4')
+STILL_BLOCK     = md5_encrypt('5')
 USR_PASS_KEY    = "here_comes_usrname_password"
 LOGOUT_STR      = "logout"
 
@@ -42,22 +43,38 @@ def connect_server(address):
 
 class Utils(object):
     def __init__(self, connections, server_socket):
-        self.connections = connections
-        self.server_socket = server_socket
+        self.connections     = connections
+        self.server_socket   = server_socket
+        self.usr_fail_login  = {}
+        self.usr_logout_time = {}
 
     def msg_handler(self, user, msg):
         msg  = msg.lower()[:-1]
-        args = msg.split(' ')
+        args = msg.split()
         if args:
            if args[0] == "whoelse":
               usr_list = ["Current Online Users:\n"]
               for usr in self.connections:
                   if usr != user and usr != self.server_socket:
                      usr_list.append(usr.name)
-                     usr_list.append("\n")
+                     usr_list.append('\n')
               user.socket.send(''.join(usr_list))
            elif args[0] == "wholast":
-              print "wholast cmd"
+                try:
+                    last_usr_list = ["last Online Uses:\n"]
+                    print self.usr_logout_time
+                    for usrname in self.usr_logout_time.keys():
+                        last_time = set_minutes(int(args[1]))
+                        print "usrname", usrname
+                        print usrname != user.name
+                        print self.is_usr_last(usrname, last_time)
+                        if usrname != user.name and                            \
+                           self.is_usr_last(usrname, last_time):
+                            last_usr_list.append(usrname)
+                            last_usr_list.append('\n')
+                    user.socket.send(''.join(last_usr_list))
+                except IndexError:
+                    self.send_err_msg(user, "plz indicate last time")
            elif args[0] == "broadcast":
                 try:
                     if args[1] == "message":
@@ -108,6 +125,10 @@ class Utils(object):
               self.remove_user(user)
            else:
               self.send_err_msg(user, "Invalid Input Command")
+
+    def is_usr_last(self, username, last_time):
+        return self.time_pass_util_now(self.usr_logout_time[username])         \
+                                                                    <= last_time
 
     def find_messgae_idx(self, args):
         msg_idx = -1
@@ -164,13 +185,26 @@ class Utils(object):
                 self.remove_user(user)
 
     def is_user_inactive(self, user):
-        return (datetime.datetime.now() - user.active_time).total_seconds()    \
-                                                                 > TIME_OUT
+        return self.time_pass_util_now(user.active_time) > TIME_OUT
+
+    def is_usr_blocked(self, user):
+        block_time = self.usr_fail_login.get((user.name, user.ip))
+        return block_time and self.time_pass_util_now(block_time) <= BLOCK_TIME
+
+    def time_pass_util_now(self, time):
+        return (datetime.datetime.now() - time).total_seconds()
+
+    def block_fail_login(self, user):
+        user.socket.send(STILL_BLOCK)
+        self.remove_user(user)
 
     def remove_user(self, user):
         user.socket.close()
         if user in self.connections:
            self.connections.remove(user)
+           if user.name != "new_user":
+              self.usr_logout_time[user.name] = datetime.datetime.now()
+              print self.usr_logout_time
 
     def broadcast(self, user, message, connections=[]):
         if not connections:
