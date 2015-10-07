@@ -20,7 +20,6 @@ class Server(object):
           self.connections    = [self.server_socket]
           self.u              = Utils(self.connections, self.server_socket)
           self.usr_database   = self.u.load_usr_pass()
-          self.u.usr_fail_login = {}
           self.login_count    = {}
           print "PyTalk server started at %s on port %s" % (localhost, str(port))
 
@@ -38,12 +37,16 @@ class Server(object):
                            self.u.connections.append(new_user)
                            new_user.socket.send(NEED_USR_N_PASS)
                            self.login_count[new_user] = 0
-                           print "Client %s at %s now join!" % (new_user, self.get_usr_ip(new_user))
+                           print "Client %s at %s now join!" %                 \
+                                 (new_user, self.get_usr_ip(new_user))
                         else: # new message from client
                            msg = user.socket.recv(RECV_BUFFER)
                            if msg:
                               if USR_PASS_KEY in msg:
                                  if self.is_usr_login(user, msg):
+                                    self.u.usr_logout_time[user.name] =        \
+                                                        datetime.datetime.max
+                                    print self.u.usr_logout_time
                                     user.socket.send                           \
                                     ("Welcome %s to join PyTalk!\n" % user.name)
                                     self.u.broadcast(user,                     \

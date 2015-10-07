@@ -45,12 +45,15 @@ class Client(object):
                                     if "Welcome " in msg:
                                         self.client_name = msg.split(' ')[1]
                                     elif self.is_client_inactive(msg):
-                                        sys.stdout.write('\n' + self.client_name \
-                                               + ", you are too inactive, bye~\n")
+                                        sys.stdout.write                       \
+                                        ('\n' + self.client_name               \
+                                          + ", you are too inactive, bye~\n")
                                         status = 0
                                         break
                                     elif self.is_client_blocked(msg):
-                                        sys.stdout.write("\nYou are still blocked from this ip, bye~\n")
+                                        sys.stdout.write                       \
+                                        ("\nYou are still blocked              \
+                                          from this ip, bye~\n")
                                         status = 0
                                         break
                                     sys.stdout.write(msg)
@@ -72,9 +75,10 @@ class Client(object):
                                 if msg[:-1] == LOGOUT_STR:
                                     print "Bye %s ..." % self.client_name
                                     status = 0
+                                elif msg.isspace():
+                                    self.prompt()
                                 else:
                                     self.server_connect.sendall(msg)
-                              # self.prompt()
 
                 except KeyboardInterrupt, SystemExit:
                        print "\nLeaving PyTalk..."
