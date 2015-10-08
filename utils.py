@@ -42,6 +42,9 @@ def connect_server(address):
         print "unable to connect server, leaving..."
         sys.exit(1)
 
+class NotNumberError(Exception):
+    pass
+
 class Utils(object):
     def __init__(self, connections, server_socket):
         self.connections     = connections
@@ -64,7 +67,9 @@ class Utils(object):
                 try:
                     last_usr_list = ["last Online Uses:\n"]
                     for usrname in self.usr_logout_time.keys():
-                        last_time = set_minutes(int(args[1]))
+                        if not args[1].isdigit():
+                            raise NotNumberError()
+                        last_time = set_minutes(float(args[1]))
                         if usrname != user.name and                            \
                            self.is_usr_last(usrname, last_time):
                             last_usr_list.append(usrname)
@@ -72,6 +77,8 @@ class Utils(object):
                     user.socket.send(''.join(last_usr_list))
                 except IndexError:
                     self.send_err_msg(user, "plz indicate last time")
+                except NotNumberError:
+                    self.send_err_msg(user, "plz input number for wholast")
            elif args[0] == "broadcast":
                 try:
                     if args[1] == "message":
@@ -86,17 +93,21 @@ class Utils(object):
                         msg_idx = self.find_messgae_idx(args)
                         if msg_idx < 3:
                             self.send_err_msg(user,                            \
-                                             "plz assign users to broadcast")
+                                             "plz assign user to broadcast")
                         else:
                             usrnames    = args[2:msg_idx]
                             connections = self.get_usr_connections(usrnames)
                             try:
-                                message = ' '.join(args[msg_idx + 1:])
-                                self.broadcast                                 \
-                                        (user,                                 \
-                                         user.name + " says: " + message,      \
-                                         connections)
-                                self.send_msg(user)
+                                if connections:
+                                    message = ' '.join(args[msg_idx + 1:])
+                                    self.broadcast                             \
+                                            (user,                             \
+                                             user.name + " says: " + message,  \
+                                             connections)
+                                    self.send_msg(user)
+                                else:
+                                    self.send_err_msg(user,                    \
+                                        "plz assign correct users to broadcast")
                             except IndexError:
                                 self.send_err_msg                              \
                                      (user, "message required for broadcast")
@@ -167,7 +178,7 @@ class Utils(object):
              if passwrd[-1] == '\n':
                 usr_pass_hash[usrname] = passwrd[:-1] # escape the '\n'
              else:
-                usr_pass_hash[usrname] = passwrd # escape the '\n'
+                usr_pass_hash[usrname] = passwrd
         file_obj.close()
         return usr_pass_hash
 
@@ -178,8 +189,6 @@ class Utils(object):
         for user in self.connections:
             if user != self.server_socket and self.is_user_inactive(user):
                 self.kick_out_user(user, TIME_OUT_BLOCK)
-                # user.socket.send(TIME_OUT_BLOCK)
-                # self.remove_user(user)
 
     def is_user_inactive(self, user):
         return self.time_pass_util_now(user.active_time) > TIME_OUT
@@ -193,8 +202,6 @@ class Utils(object):
 
     def block_fail_login(self, user):
         self.kick_out_user(user, STILL_BLOCK)
-        # user.socket.send(STILL_BLOCK)
-        # self.remove_user(user)
 
     def is_usr_repeated(self, username):
         for usr in self.connections:

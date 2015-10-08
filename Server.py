@@ -46,7 +46,6 @@ class Server(object):
                                  if self.is_usr_login(user, msg):
                                     self.u.usr_logout_time[user.name] =        \
                                                         datetime.datetime.max
-                                    print self.u.usr_logout_time
                                     user.socket.send                           \
                                     ("Welcome %s to join PyTalk!\n" % user.name)
                                     self.u.broadcast(user,                     \
@@ -99,14 +98,9 @@ class Server(object):
                 del self.login_count[user]
              return False
 
-
       def is_usr_pass_correct(self, user, msg):
           key, username, password = msg.split('#')
-          if self.usr_database.get(username) != password:
-             return False
-          else:
-             # user.name = username
-             return True
+          return self.usr_database.get(username) == password
 
       def get_username_from_msg(self, msg):
           key, username, password = msg.split('#')

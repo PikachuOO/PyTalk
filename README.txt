@@ -39,13 +39,13 @@ To run the program:
 
 Implemented commands:
 
-|commands                       |Functionality                                 |
-|-------------------------------|----------------------------------------------|
-|whoelse                        |Displays name of other connected users        |
-|wholast [number]               |Displays name of those users connected within the last [number] minutes. Let 0 < number < 60|
-|broadcast message [message]    |Broadcasts [message] to all connected users   |
-|broadcast user [user] [user]... [user] message [message]|Broadcasts [message] to the list of users      |
-|message [user] [message]       |Private [message] to a [user]                 |
-|logout                         |Log out this user.                            |
-
+commands                        Functionality
+whoelse                         Displays name of other connected users
+wholast [number]                Displays name of those users 
+                                connected within the last [number] minutes. Let 0 < number < 60|
+broadcast message [message]     Broadcasts [message] to all connected users
+broadcast user [user] [user]... Broadcasts [message] to the list of users
+[user] message [message]
+message [user] [message]        Private [message] to a [user]
+logout                          Log out this user.
 
