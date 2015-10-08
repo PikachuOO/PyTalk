@@ -56,4 +56,6 @@ To run the program:
 |message [user] [message]       |Private [message] to a [user]                 |
 |logout                         |Log out this user.                            |
 
+#### Hope you enjoy PyTalk!!!
+![Hope you like it](http://cdn0.vox-cdn.com/assets/5057232/kerley_dance.gif)
 
