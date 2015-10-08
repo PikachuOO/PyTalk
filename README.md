@@ -10,32 +10,32 @@ PyTalk includes 6 files:
 
 1. utils.py:
 
-class for utility function
-Like message parser, connecting server,
-and all the variable(TIME_OUT, BLOCK_TIME, etc...)
-that would be used in server and client.
+  class for utility function
+  Like message parser, connecting server,
+  and all the variable(TIME_OUT, BLOCK_TIME, etc...)
+  that would be used in server and client.
 
 2. user.py:
 
-class for every PyTalk user of the chat room.
-It defines a user that has a username, socket, ip,
-and its active_time allow us to use user object
-directly to do several things without confusion.
+  class for every PyTalk user of the chat room.
+  It defines a user that has a username, socket, ip,
+  and its active_time allow us to use user object
+  directly to do several things without confusion.
 
 3. client.py:
 
-class for PyTalk client side. Basically client doesn't do
-too many complicated things. It just receive the message
-sent from server, and make the move(ex. send message or
-exit PyTalk) with different message.
+  class for PyTalk client side. Basically client doesn't do
+  too many complicated things. It just receive the message
+  sent from server, and make the move(ex. send message or
+  exit PyTalk) with different message.
 
 4. server.py:
 
-class for PyTalk server side. Server will recieve all
-the message sent from client. It will decide the client
-login sucessfully or not(and is user repeated or need to
-block too), and what kind of messag client send and decide
-what kind of action to do with different income message.
+  class for PyTalk server side. Server will recieve all
+  the message sent from client. It will decide the client
+  login sucessfully or not(and is user repeated or need to
+  block too), and what kind of messag client send and decide
+  what kind of action to do with different income message.
 
 - other files: user_pass.txt, Makefile.
 
