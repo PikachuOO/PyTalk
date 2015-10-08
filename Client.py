@@ -113,8 +113,6 @@ class Client(object):
           self.server_connect.sendall(USR_PASS_KEY                             \
                                       + "#" + username                         \
                                       + "#" + password)
-
-
       def run(self):
           self.client_loop();
 

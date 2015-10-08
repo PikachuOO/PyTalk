@@ -1,43 +1,51 @@
 # PyTalk
-Computer Networks Programming Assignment 1: Socket Programming - Simple Chat App
+### Computer Networks Programming Assignment 1: Socket Programming - Simple Chat App
 
-Chia-Hao Hsu
-UNI: ch3141
+#### Chia-Hao Hsu
+#### UNI: ch3141
 
-------------------------------- Description -----------------------------------
+## Description
 
-My chat server was separate in 4 files. 
+PyTalk includes 6 files:
 
-user_pass.txt: has all the credentials to access the chat.
+- main program files: utils.py, user.py, Client.py, Server.py
 
-utils.py: class that deals with all the messages exchanged in the chat. 
-             It defines a protocol that has a type, message, source and 
-             destination.
+1. utils.py: class for utility function
+             Like message parser, connecting server,
+             and all the variable(TIME_OUT, BLOCK_TIME, etc...)
+             that would be used in server and client.
 
-user.py: class for every user of the chat.
-         It defines a user that has a username, password, how many times the 
-         user tried unsucessful to login, the date that that the user tried 
-         to login, port number, ip number, blocked users and the user's last 
-         heartbeat.
+2. user.py: class for every PyTalk user of the chat room.
+            It defines a user that has a username, socket, ip,
+            and its active_time allow us to use user object
+            directly to do several things without confusion.
 
-client.py: file with the Chat Client. It has functions for authentication, chat, 
-           notifications, finding online users and to send heartbeat. It also 
-           implements the peer-to-peer chat. 
+3. client.py: class for PyTalk client side. Basically client doesn't do
+              too many complicated things. It just receive the message
+              sent from server, and make the move(ex. send message or
+              exit PyTalk) with different message.
 
-server.py: file with the Message Center. It has functions for user authentication, 
-           user message fowarding, timeout, blacklisting, presence broadcast, 
-           offline messages and to send users address.
+4. server.py: class for PyTalk server side. Server will recieve all
+              the message sent from client. It will decide the client
+              login sucessfully or not(and is user repeated or need to
+              block too), and what kind of messag client send and decide
+              what kind of action to do with different income message.
 
-------------------------------- How to use it ---------------------------------
+- other files: user_pass.txt, Makefile.
+
+1. user_pass.txt: has all the credentials to access the chat.
+2. Makefile: nothing there, just some echo message.
+
+## How to use it?
 
 To run the program:
-    1. Start the server with the port number that you want to user. 
+    1. Start the server with the port number that you want to user.
         python Server.py port_number
-    2. Start the client with the ip number provided by the server and the same 
+    2. Start the client with the ip number provided by the server and the same
        port number.
         python Client.py server_ip port_number
 
-Implemented commands:
+## Implemented commands
 
 |commands                       |Functionality                                 |
 |-------------------------------|----------------------------------------------|
