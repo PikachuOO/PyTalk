@@ -46,7 +46,6 @@ class Server(object):
                                  if self.is_usr_login(user, msg):
                                     self.u.usr_logout_time[user.name] =        \
                                                         datetime.datetime.max
-                                    print self.u.usr_logout_time
                                     user.socket.send                           \
                                     ("Welcome %s to join PyTalk!\n" % user.name)
                                     self.u.broadcast(user,                     \

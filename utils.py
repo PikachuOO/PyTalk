@@ -42,6 +42,9 @@ def connect_server(address):
         print "unable to connect server, leaving..."
         sys.exit(1)
 
+class NotNumberError(Exception):
+    pass
+
 class Utils(object):
     def __init__(self, connections, server_socket):
         self.connections     = connections
@@ -64,7 +67,9 @@ class Utils(object):
                 try:
                     last_usr_list = ["last Online Uses:\n"]
                     for usrname in self.usr_logout_time.keys():
-                        last_time = set_minutes(int(args[1]))
+                        if not args[1].isdigit():
+                            raise NotNumberError()
+                        last_time = set_minutes(float(args[1]))
                         if usrname != user.name and                            \
                            self.is_usr_last(usrname, last_time):
                             last_usr_list.append(usrname)
@@ -72,6 +77,8 @@ class Utils(object):
                     user.socket.send(''.join(last_usr_list))
                 except IndexError:
                     self.send_err_msg(user, "plz indicate last time")
+                except NotNumberError:
+                    self.send_err_msg(user, "plz input number for wholast")
            elif args[0] == "broadcast":
                 try:
                     if args[1] == "message":
