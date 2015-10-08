@@ -98,14 +98,9 @@ class Server(object):
                 del self.login_count[user]
              return False
 
-
       def is_usr_pass_correct(self, user, msg):
           key, username, password = msg.split('#')
-          if self.usr_database.get(username) != password:
-             return False
-          else:
-             # user.name = username
-             return True
+          return self.usr_database.get(username) == password
 
       def get_username_from_msg(self, msg):
           key, username, password = msg.split('#')
