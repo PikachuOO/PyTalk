@@ -1,10 +1,11 @@
 # PyTalk
-### Computer Networks Programming Assignment 1: Socket Programming - Simple Chat App
+#### Computer Networks Programming Assignment 1: Socket Programming - Simple Chat App
 
-#### Chia-Hao Hsu
-#### UNI: ch3141
+###### Chia-Hao Hsu
+###### UNI: ch3141
 
-## Description
+### Description
+------
 
 PyTalk includes 6 files:
 
@@ -36,7 +37,8 @@ PyTalk includes 6 files:
 1. user_pass.txt: has all the credentials to access the chat.
 2. Makefile: nothing there, just some echo message.
 
-## How to use it?
+### How to use it?
+------
 
 To run the program:
     1. Start the server with the port number that you want to user.
@@ -45,7 +47,8 @@ To run the program:
        port number.
         python Client.py server_ip port_number
 
-## Implemented commands
+### Implemented commands
+------
 
 |commands                       |Functionality                                 |
 |-------------------------------|----------------------------------------------|
