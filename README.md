@@ -48,8 +48,11 @@ what kind of action to do with different income message.
 To run the program:
 
 1. Start the server with the port number that you want to use.
+
 *python Server.py port_number
+
 2. Start the client with the ip number provided by the server and the same port number.
+
 *python Client.py server_ip port_number
 
 ### Implemented commands
