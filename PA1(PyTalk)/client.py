@@ -4,9 +4,9 @@ import sys
 
 # from utils import User
 from utils import connect_server
-from utils import RECV_BUFFER, NEED_USR_N_PASS, USR_PASS_ERROR, \
-                  CLIENT_IP_BLOCK, STILL_BLOCK, TIME_OUT_BLOCK, \
-                  USR_PASS_KEY, LOGOUT_STR
+from utils import RECV_BUFFER, NEED_USR_N_PASS, USR_PASS_ERROR,                \
+                  CLIENT_IP_BLOCK, STILL_BLOCK, TIME_OUT_BLOCK,                \
+                  USR_PASS_KEY, LOGOUT_STR, USR_REPEATED
 
 def argv_reader(argv):
     if len(argv) < 3:
@@ -52,8 +52,13 @@ class Client(object):
                                         break
                                     elif self.is_client_blocked(msg):
                                         sys.stdout.write                       \
-                                        ("\nYou are still blocked              \
-                                          from this ip, bye~\n")
+                                        ("\nYou are still blocked "            \
+                                            "from this ip, bye~\n")
+                                        status = 0
+                                        break
+                                    elif self.is_client_repeated(msg):
+                                        sys.stdout.write                       \
+                                        ("\nYou are repeated, bye~\n")
                                         status = 0
                                         break
                                     sys.stdout.write(msg)
@@ -95,6 +100,9 @@ class Client(object):
 
       def is_client_blocked(self, msg):
           return msg == STILL_BLOCK
+
+      def is_client_repeated(self, msg):
+          return msg == USR_REPEATED
 
       def login_prompt(self, display_msg):
           sys.stdout.write(display_msg)

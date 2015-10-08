@@ -19,6 +19,7 @@ USR_PASS_ERROR  = md5_encrypt('2')
 CLIENT_IP_BLOCK = md5_encrypt('3')
 TIME_OUT_BLOCK  = md5_encrypt('4')
 STILL_BLOCK     = md5_encrypt('5')
+USR_REPEATED    = md5_encrypt('6')
 USR_PASS_KEY    = "here_comes_usrname_password"
 LOGOUT_STR      = "logout"
 
@@ -62,12 +63,8 @@ class Utils(object):
            elif args[0] == "wholast":
                 try:
                     last_usr_list = ["last Online Uses:\n"]
-                    print self.usr_logout_time
                     for usrname in self.usr_logout_time.keys():
                         last_time = set_minutes(int(args[1]))
-                        print "usrname", usrname
-                        print usrname != user.name
-                        print self.is_usr_last(usrname, last_time)
                         if usrname != user.name and                            \
                            self.is_usr_last(usrname, last_time):
                             last_usr_list.append(usrname)
@@ -180,22 +177,36 @@ class Utils(object):
     def user_active_check(self):
         for user in self.connections:
             if user != self.server_socket and self.is_user_inactive(user):
-                print "kick %s out" % user.name
-                user.socket.send(TIME_OUT_BLOCK)
-                self.remove_user(user)
+                self.kick_out_user(user, TIME_OUT_BLOCK)
+                # user.socket.send(TIME_OUT_BLOCK)
+                # self.remove_user(user)
 
     def is_user_inactive(self, user):
         return self.time_pass_util_now(user.active_time) > TIME_OUT
 
-    def is_usr_blocked(self, user):
-        block_time = self.usr_fail_login.get((user.name, user.ip))
+    def is_usr_blocked(self, user, username):
+        block_time = self.usr_fail_login.get((username, user.ip))
         return block_time and self.time_pass_util_now(block_time) <= BLOCK_TIME
 
     def time_pass_util_now(self, time):
         return (datetime.datetime.now() - time).total_seconds()
 
     def block_fail_login(self, user):
-        user.socket.send(STILL_BLOCK)
+        self.kick_out_user(user, STILL_BLOCK)
+        # user.socket.send(STILL_BLOCK)
+        # self.remove_user(user)
+
+    def is_usr_repeated(self, username):
+        for usr in self.connections:
+            if usr != self.server_socket and usr.name == username:
+                return True
+        return False
+
+    def delete_repeated_usr(self, user):
+        self.kick_out_user(user, USR_REPEATED)
+
+    def kick_out_user(self, user, err_code):
+        user.socket.send(err_code)
         self.remove_user(user)
 
     def remove_user(self, user):
@@ -204,7 +215,6 @@ class Utils(object):
            self.connections.remove(user)
            if user.name != "new_user":
               self.usr_logout_time[user.name] = datetime.datetime.now()
-              print self.usr_logout_time
 
     def broadcast(self, user, message, connections=[]):
         if not connections:

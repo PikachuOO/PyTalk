@@ -5,7 +5,7 @@ import sys
 
 from user  import User
 from utils import RECV_BUFFER, NEED_USR_N_PASS, USR_PASS_ERROR,                \
-                  CLIENT_IP_BLOCK, USR_PASS_KEY
+                  CLIENT_IP_BLOCK, USR_PASS_KEY, USR_REPEATED
 from utils import TIME_OUT, BLOCK_TIME
 from utils import create_socket
 from utils import Utils
@@ -72,15 +72,20 @@ class Server(object):
 
       def is_usr_login(self, user, msg):
           if self.is_usr_pass_correct(user, msg):
-             if self.u.is_usr_blocked(user):
-                 self.u.block_fail_login(user)
-                 return False
+             username = self.get_username_from_msg(msg)
+             if self.u.is_usr_blocked(user, username):
+                self.u.block_fail_login(user)
+                return False
+             elif self.u.is_usr_repeated(username):
+                self.u.delete_repeated_usr(user)
+                return False
              else:
-                 self.login_count[user] = 0
-                 if self.u.usr_fail_login.get((user.name, user.ip)):
-                    del self.u.usr_fail_login[(user.name, user.ip)]
-                 user.active_time = datetime.datetime.now()
-                 return True
+                user.name = username
+                self.login_count[user] = 0
+                if self.u.usr_fail_login.get((user.name, user.ip)):
+                   del self.u.usr_fail_login[(user.name, user.ip)]
+                user.active_time = datetime.datetime.now()
+                return True
           else:
              self.login_count[user] += 1
              if self.login_count[user] < 3:
@@ -94,12 +99,13 @@ class Server(object):
                 del self.login_count[user]
              return False
 
+
       def is_usr_pass_correct(self, user, msg):
           key, username, password = msg.split('#')
           if self.usr_database.get(username) != password:
              return False
           else:
-             user.name = username
+             # user.name = username
              return True
 
       def get_username_from_msg(self, msg):
