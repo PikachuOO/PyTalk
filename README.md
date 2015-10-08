@@ -38,11 +38,10 @@ PyTalk includes 6 files:
 ------
 
 To run the program:
-    1. Start the server with the port number that you want to user.
-        python Server.py port_number
-    2. Start the client with the ip number provided by the server and the same
-       port number.
-        python Client.py server_ip port_number
+1. Start the server with the port number that you want to use.
++python Server.py port_number
+2. Start the client with the ip number provided by the server and the same port number.
++python Client.py server_ip port_number
 
 ### Implemented commands
 ------
@@ -55,6 +54,7 @@ To run the program:
 |broadcast user [user] [user]... [user] message [message]|Broadcasts [message] to the list of users      |
 |message [user] [message]       |Private [message] to a [user]                 |
 |logout                         |Log out this user.                            |
+
 
 #### Hope you enjoy PyTalk!!!
 ![Hope you like it](http://cdn0.vox-cdn.com/assets/5057232/kerley_dance.gif)
