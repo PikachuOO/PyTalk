@@ -1,6 +1,9 @@
 # PyTalk
 #### Computer Networks Programming Assignment 1: Socket Programming - Simple Chat App
 
+![Hope you like it](https://s-media-cache-ak0.pinimg.com/736x/46/4f/de/464fde803728077a4d087c24916611a1.jpg)
+
+
 ### Description
 ------
 
